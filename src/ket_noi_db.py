@@ -1,7 +1,6 @@
 import pyodbc
 import pandas as pd
 
-
 def lay_du_lieu_tu_db(server='BOSS\\SQLEXPRESS', database='DuDoanSuDungNuoc', 
                        table='DuLieuNuoc', col_date='NgayThang', col_value='LuongNuoc'):
     try:
@@ -31,11 +30,9 @@ def lay_du_lieu_tu_db(server='BOSS\\SQLEXPRESS', database='DuDoanSuDungNuoc',
         df['value'] = pd.to_numeric(df['value'], errors='coerce')
         df = df.dropna(subset=['value']) 
         df = df.sort_values('date').reset_index(drop=True)
-        
         return df
     except Exception as e:
         raise Exception(f'Lỗi khi truy vấn bảng {table}: {e}')
-
 
 if __name__ == '__main__':
     # Test nhanh

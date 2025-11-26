@@ -23,6 +23,7 @@ class ChuoiThoiGianMo:
         self.khoang = None
         self.trung_tam = None
         self.quan_he = {}  # map index_khoang_t-1 -> list of (index_khoang_t, weight)
+        self.steps_info = {}  # lưu thông tin các bước tạo tập mờ để hiển thị
 
     def _tao_khoang(self, values):
         vmin, vmax = np.min(values), np.max(values)
@@ -56,6 +57,16 @@ class ChuoiThoiGianMo:
         """Huấn luyện mô hình (xây luật từ chuỗi series). series là pandas Series index thời gian."""
         values = series.values
         self._tao_khoang(values)
+        # chuẩn bị info về tạo tập mờ
+        vmin, vmax = float(np.min(values)), float(np.max(values))
+        self.steps_info = {
+            'vmin': vmin,
+            'vmax': vmax,
+            'so_khoang': int(self.so_khoang),
+            'overlap': float(self.overlap),
+            'edges': list(map(float, self.khoang)),
+            'centers': list(map(float, self.trung_tam))
+        }
         # fuzzify các giá trị sang chỉ số khoang (giữ membership)
         memberships = [self._membership(x) for x in values]
         # xây luật A_{t-1} -> A_t bằng cách cộng membership
@@ -79,6 +90,20 @@ class ChuoiThoiGianMo:
             if totale > 0:
                 for j in self.quan_he[i]:
                     self.quan_he[i][j] /= totale
+        # sau khi xây luật, tóm tắt quan hệ (rules) cho mục hiển thị
+        rules_summary = {}
+        for i in range(self.so_khoang):
+            items = list(self.quan_he[i].items())
+            # sắp xếp theo trọng số giảm dần
+            items_sorted = sorted(items, key=lambda x: x[1], reverse=True)
+            # lấy tối đa 5 hậu quả có trọng số lớn nhất để hiển thị
+            rules_summary[i] = [{'to': int(j), 'weight': float(w)} for j, w in items_sorted[:5]]
+        self.steps_info['rules_summary'] = rules_summary
+        # thêm sample memberships (vài giá trị đầu) để minh họa
+        sample_memberships = []
+        for idx, x in enumerate(values[:min(10, len(values))]):
+            sample_memberships.append({'index': int(idx), 'value': float(x), 'membership': list(map(float, memberships[idx]))})
+        self.steps_info['sample_memberships'] = sample_memberships
 
     def _fuzzify_value(self, x):
         mu = self._membership(x)
