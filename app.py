@@ -10,7 +10,7 @@ import json
 import pandas as _pd
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'src')))
-from evaluate import chay_psu_toi_uu
+from chinh_dieu_phoi_hop import chay_pipeline_7_buoc
 from xuly_du_lieu import doc_du_lieu, tien_xu_ly
 
 
@@ -247,8 +247,7 @@ if df is not None:
             with st.spinner('⏳ Đang chạy mô hình (có thể mất vài chục giây)...'):
                 df_input = df_xuly[['date', 'value']].copy()
                 try:
-                    from evaluate import chay_de_pipeline
-                    res = chay_de_pipeline(df_input, n_khoang=None)
+                    res = chay_pipeline_7_buoc(df_input, n_khoang=None)
                 except Exception as e:
                     st.error(f'Lỗi khi chạy mô hình: {e}')
                     res = None
