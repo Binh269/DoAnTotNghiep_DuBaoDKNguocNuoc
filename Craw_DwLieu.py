@@ -12,7 +12,7 @@ def fetch_day(date_obj):
 
     url = (
         "https://hochuathuydien.evn.com.vn/"
-        f"PageHoChuaThuyDienEmbedEVN.aspx?td={encoded_date}&vm=90&lv=9&hc=1"
+        f"PageHoChuaThuyDienEmbedEVN.aspx?td={encoded_date}&vm=80&lv=&hc=34"
     )
 
     for retry in range(3):
@@ -74,7 +74,7 @@ def run_scraper(start, end):
 
     df = pd.DataFrame(all_rows)
 
-    output_path = "CSV/evn.csv"
+    output_path = "CSV/ThuyDienQuangTriCraw.csv"
 
     df.to_csv(output_path, index=False, encoding="utf-8-sig")
     print(f"✔️ Xong, lưu file tại: {output_path}")
@@ -82,6 +82,6 @@ def run_scraper(start, end):
 
 
 run_scraper(
-    datetime(2020, 1, 1, 21, 0),
+    datetime(2025, 1, 1, 21, 0),
     datetime(2025, 12, 7, 21, 0)
 )

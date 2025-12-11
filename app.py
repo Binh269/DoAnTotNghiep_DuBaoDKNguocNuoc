@@ -61,7 +61,7 @@ class TuyChinhKetHop:
 
 # ============= Helper Functions from Test.py =============
 
-def tim_k_toi_uu_pso(du_lieu, so_cum_toi_da=10, so_hat=15, so_lap=30):
+def tim_k_toi_uu_pso(du_lieu, so_cum_toi_da, so_hat, so_lap):
     """Tìm số khoảng tối ưu bằng PSO sử dụng chỉ số Davies-Bouldin (DBI)"""
     
     # Chuẩn bị dữ liệu 1 lần để không phải reshape lặp lại
@@ -109,40 +109,6 @@ def tim_k_toi_uu_pso(du_lieu, so_cum_toi_da=10, so_hat=15, so_lap=30):
     so_cum_toi_uu = max(2, min(so_cum_toi_uu, so_cum_toi_da))
     
     return so_cum_toi_uu, gia_tri_toi_uu
-# def tim_k_toi_uu_pso(du_lieu, so_cum_toi_da=10, so_hat=15, so_lap=30):
-#     """Tìm số khoảng tối ưu bằng PSO """
-#     def ham_muc_tieu(x):
-#         # x là mảng chứa K (số cụm)
-#         so_cum = int(np.clip(x[0], 2, so_cum_toi_da))
-        
-#         try:
-#             # Áp dụng K-means
-#             tui_chim_kmeans = KMeans(n_clusters=so_cum, random_state=42, n_init=5)
-#             tui_chim_kmeans.fit(np.array(du_lieu).reshape(-1, 1))
-            
-#             # Tính J(V) = ∑∑ |(xⱼ - cᵢ)|²
-#             # inertia của sklearn chính là tổng khoảng cách bình phương
-#             gia_tri_j = tui_chim_kmeans.inertia_
-            
-#             # Thêm penalty để ưu tiên K nhỏ hơn
-#             # phat = 0.1 * so_cum
-#             # return gia_tri_j + phat
-#             he_so_phat = 0.04 
-#             ham_muc_tieu_moi = gia_tri_j * (1 + he_so_phat * so_cum)
-            
-#             return ham_muc_tieu_moi
-#         except:
-#             return np.inf
-    
-#     # Khởi tạo PSO với bounds cho K
-#     cac_bien = [(2, so_cum_toi_da)]
-#     tui_chim_que_hop = TuyChinhKetHop(ham_muc_tieu, cac_bien, so_hat=so_hat, so_lap=so_lap, hat_giong=42)
-    
-#     # Chạy PSO
-#     k_toi_uu_vector, gia_tri_toi_uu = tui_chim_que_hop.chay()
-#     so_cum_toi_uu = int(np.clip(k_toi_uu_vector[0], 2, so_cum_toi_da))
-    
-#     return so_cum_toi_uu, gia_tri_toi_uu
 
 def tim_k_toi_uu_kmeans(du_lieu, so_cum_toi_da=10):
     """Tìm số khoảng tối ưu bằng K-means sử dụng Elbow method"""
@@ -164,8 +130,8 @@ def tim_k_toi_uu_kmeans(du_lieu, so_cum_toi_da=10):
 def xac_dinh_tap_hop_van_de_va_khoang(du_lieu, so_khoang):
     """Phân vùng tập hợp luận dựa trên K-means"""
     gia_tri_toi_thieu, gia_tri_toi_da = min(du_lieu), max(du_lieu)
-    do_chenh_lech_1 = (gia_tri_toi_da - gia_tri_toi_thieu) * 0.1
-    do_chenh_lech_2 = (gia_tri_toi_da - gia_tri_toi_thieu) * 0.1
+    do_chenh_lech_1 = (gia_tri_toi_da - gia_tri_toi_thieu) * 0.001
+    do_chenh_lech_2 = (gia_tri_toi_da - gia_tri_toi_thieu) * 0.001
     van_de = [gia_tri_toi_thieu - do_chenh_lech_1, gia_tri_toi_da + do_chenh_lech_2]
     rong_khoang = (van_de[1] - van_de[0]) / so_khoang
     cac_khoang = [[van_de[0] + i * rong_khoang, van_de[0] + (i + 1) * rong_khoang] for i in range(so_khoang)]
@@ -493,7 +459,7 @@ uploaded_file = st.sidebar.file_uploader('Chọn file CSV hoặc Excel', type=['
 tuy_chon_thoi_gian = st.sidebar.selectbox(
     "Chọn mức độ tổng hợp dữ liệu:",
     ["Ngày", "Tháng", "Năm"],
-    index=0,
+    index=1,
     help="Chọn 'Tháng' hoặc 'Năm' để tính trung bình cộng giá trị theo thời gian tương ứng."
 )
 
@@ -608,7 +574,7 @@ if st.session_state['data_loaded'] and st.session_state['df'] is not None:
     col1, col2, col3 = st.columns(3)
     with col1:
         # Slider để chọn K tối đa (giới hạn trên của không gian tìm kiếm)
-        so_cum_toi_da = st.slider('Khoảng tối đa:', 2, 30, 14, 
+        so_cum_toi_da = st.slider('Khoảng tối đa:', 2, 30, 7, 
                           help='Số khoảng tối đa để tìm kiếm - PSO sẽ tìm K trong khoảng [2, K tối đa]')
     
     with col2:
